@@ -6,21 +6,11 @@ import io.micrometer.core.instrument.Timer;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
 
 /**
- * Registers custom business metrics and health indicators.
- *
- * Metrics exposed at /actuator/prometheus (scraped by Prometheus / Grafana Cloud).
- * Health available at /actuator/health (private port 8081 in production).
+ * Registra métricas de negocio en Micrometer.
+ * Los health indicators de DB y Redis los maneja Spring Boot automáticamente.
  */
 @Configuration
 @RequiredArgsConstructor
@@ -28,8 +18,6 @@ import java.sql.Connection;
 public class ObservabilityConfig {
 
     private final MeterRegistry registry;
-
-    // ── Business metrics ──────────────────────────────────────────────────────
 
     private Counter loginSuccessCounter;
     private Counter loginFailureCounter;
@@ -68,41 +56,5 @@ public class ObservabilityConfig {
         orderCreationTimer = Timer.builder("elite.orders.creation.duration")
                 .description("Time to process order creation (ms)")
                 .register(registry);
-    }
-
-    // ── Health indicators ─────────────────────────────────────────────────────
-
-    @Bean("dbHealthIndicator")
-    public HealthIndicator databaseHealthIndicator(DataSource dataSource) {
-        return () -> {
-            try (Connection conn = dataSource.getConnection()) {
-                boolean valid = conn.isValid(3);
-                return valid
-                        ? Health.up().withDetail("database", "PostgreSQL reachable").build()
-                        : Health.down().withDetail("database", "Connection invalid").build();
-            } catch (Exception e) {
-                return Health.down(e).withDetail("database", "Connection failed").build();
-            }
-        };
-    }
-
-    @Bean("redisHealthIndicator")
-    public HealthIndicator redisHealthIndicator(
-            org.springframework.beans.factory.ObjectProvider<StringRedisTemplate> redisProvider) {
-        return () -> {
-            StringRedisTemplate redis = redisProvider.getIfAvailable();
-            if (redis == null) {
-                return Health.up().withDetail("redis", "Not configured (using in-memory fallback)").build();
-            }
-            try {
-                String pong = redis.getConnectionFactory()
-                        .getConnection().ping();
-                return "PONG".equals(pong)
-                        ? Health.up().withDetail("redis", "PONG").build()
-                        : Health.down().withDetail("redis", "Unexpected response: " + pong).build();
-            } catch (Exception e) {
-                return Health.down(e).withDetail("redis", "Connection failed").build();
-            }
-        };
     }
 }
