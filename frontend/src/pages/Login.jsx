@@ -145,11 +145,6 @@ const Login = () => {
             </Link>
           </p>
 
-          <div className="mt-8 p-3 border border-border/60 rounded-[var(--radius-md)] bg-surface/40">
-            <p className="text-[10px] text-dim uppercase tracking-[0.2em] mb-1.5">Demo</p>
-            <p className="text-[11px] text-dim font-mono leading-relaxed">admin@elite.com / admin123</p>
-            <p className="text-[11px] text-dim font-mono leading-relaxed">user@elite.com / user123</p>
-          </div>
         </div>
       </div>
     </div>
