@@ -33,8 +33,13 @@ const Login = () => {
       toast.success(`Bienvenido, ${userData.name || userData.username}`);
       if (userData.role === 'admin' || userData.role === 'ADMIN') navigate('/admin');
       else navigate('/');
-    } catch {
-      // error handled in AuthContext
+    } catch (err) {
+      const status = err.response?.status;
+      const msg = err.response?.data?.error || '';
+      if (status === 403 && msg.toLowerCase().includes('verify')) {
+        toast.warning('Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.');
+      }
+      // otros errores los maneja AuthContext
     } finally {
       setLoading(false);
     }
@@ -101,7 +106,7 @@ const Login = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="form-label mb-0">Contraseña</label>
-                <a href="#" className="text-xs text-dim hover:text-muted transition-colors">¿Olvidaste tu contraseña?</a>
+                <Link to="/forgot-password" className="text-xs text-dim hover:text-muted transition-colors">¿Olvidaste tu contraseña?</Link>
               </div>
               <div className="relative">
                 <input
