@@ -40,6 +40,9 @@ public class EmailService {
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
+    @Value("${app.backend.url:http://localhost:8080}")
+    private String backendUrl;
+
     private static final NumberFormat COP = NumberFormat.getNumberInstance(new Locale("es", "CO"));
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy 'a las' HH:mm");
 
@@ -58,7 +61,8 @@ public class EmailService {
     /** Verificación de correo electrónico */
     @Async
     public void sendEmailVerification(String toEmail, String username, String rawToken) {
-        String url = frontendUrl + "/email-verified?token=" + rawToken;
+        // El enlace va al backend que verifica y redirige al frontend con ?status=success|expired|error
+        String url = backendUrl + "/api/auth/verify-email?token=" + rawToken;
         send(
             toEmail,
             "Verifica tu cuenta ÉLITE",
