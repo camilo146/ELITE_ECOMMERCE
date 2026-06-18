@@ -15,8 +15,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only the non-sensitive profile (id, username, role) is in localStorage.
-    // The JWT lives in an HttpOnly cookie — JS cannot read or steal it.
     const stored = localStorage.getItem('user');
     if (stored) {
       try {
@@ -29,45 +27,61 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    const data = await authService.login(credentials);
-    setUser(data);
-    localStorage.setItem('user', JSON.stringify(data));
-    return data;
+    try {
+      const data = await authService.login(credentials);
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+      return data;
+    } catch (error) {
+      const status = error.response?.status;
+      const msg = error.response?.data?.error || '';
+      if (status === 401) {
+        toast.error('Email o contraseña incorrectos');
+      } else if (status === 403) {
+        toast.warning('Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.');
+      } else if (status === 429) {
+        toast.error('Demasiados intentos. Intenta en 15 minutos.');
+      } else {
+        toast.error(msg || 'Error al iniciar sesión');
+      }
+      throw error;
+    }
   };
 
   const register = async (userData) => {
-    const data = await authService.register(userData);
-    if (data.emailVerificationRequired) {
-      // Don't set user — they must verify email before accessing the app
-      toast.info('Registration successful! Please check your email to verify your account.');
+    try {
+      const data = await authService.register(userData);
+      if (data?.emailVerificationRequired) {
+        toast.info('¡Cuenta creada! Revisa tu email para verificar tu cuenta antes de iniciar sesión.');
+        return data;
+      }
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+      toast.success('¡Registro exitoso! Bienvenido a ÉLITE.');
       return data;
+    } catch (error) {
+      // Muestra el primer error de validación del backend si existe
+      const errors = error.response?.data?.errors;
+      const backendMsg = errors?.[0] || error.response?.data?.error;
+      toast.error(backendMsg || 'Error al registrarse. Verifica los datos.');
+      throw error;
     }
-    setUser(data);
-    localStorage.setItem('user', JSON.stringify(data));
-    toast.success('Registration successful!');
-    return data;
   };
 
   const logout = async () => {
-    await authService.logout();
+    try { await authService.logout(); } catch { /* ignore */ }
     setUser(null);
     localStorage.removeItem('user');
-    toast.info('Session closed');
+    toast.info('Sesión cerrada');
   };
 
   const logoutAll = async () => {
-    await authService.logoutAll();
+    try { await authService.logoutAll(); } catch { /* ignore */ }
     setUser(null);
     localStorage.removeItem('user');
-    toast.info('All sessions closed');
+    toast.info('Todas las sesiones cerradas');
   };
 
-  /**
-   * Called by the Axios interceptor when a 401 is received.
-   * Attempts to refresh the access token using the refresh token cookie.
-   * If refresh succeeds, updates the stored user profile.
-   * If refresh fails, clears state and redirects to login.
-   */
   const refreshSession = useCallback(async () => {
     try {
       const data = await authService.refresh();

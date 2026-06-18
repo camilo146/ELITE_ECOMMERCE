@@ -2,11 +2,19 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { FiEye, FiEyeOff, FiArrowRight, FiCheck } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiArrowRight, FiCheck, FiX } from 'react-icons/fi';
+
+// Requisitos que exige el backend (RegisterRequest.java)
+const PWD_RULES = [
+  { label: 'Mínimo 8 caracteres',           test: p => p.length >= 8 },
+  { label: 'Al menos una mayúscula',         test: p => /[A-Z]/.test(p) },
+  { label: 'Al menos una minúscula',         test: p => /[a-z]/.test(p) },
+  { label: 'Al menos un número',             test: p => /\d/.test(p) },
+];
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', password: '', confirmPassword: '',
+    username: '', email: '', phone: '', password: '', confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -16,34 +24,48 @@ const Register = () => {
 
   const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const passwordStrength = pwd => {
-    if (!pwd) return 0;
-    let score = 0;
-    if (pwd.length >= 6) score++;
-    if (pwd.length >= 10) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/\d/.test(pwd)) score++;
-    return score;
-  };
+  const pwdOk = PWD_RULES.every(r => r.test(formData.password));
 
-  const strength = passwordStrength(formData.password);
-  const strengthLabel = ['', 'Débil', 'Regular', 'Buena', 'Fuerte'][strength];
-  const strengthColor = ['', '#e11d48', '#f59e0b', '#3b82f6', '#22c55e'][strength];
+  const validate = () => {
+    if (formData.username.trim().length < 3) {
+      toast.error('El nombre de usuario debe tener al menos 3 caracteres'); return false;
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(formData.username.trim())) {
+      toast.error('El usuario solo puede tener letras, números, _ y -'); return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error('Email inválido'); return false;
+    }
+    if (!/^[0-9+\-\s()]{7,20}$/.test(formData.phone.replace(/\s/g, ''))) {
+      toast.error('Teléfono inválido (7-15 dígitos)'); return false;
+    }
+    if (!pwdOk) {
+      toast.error('La contraseña no cumple los requisitos mínimos'); return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Las contraseñas no coinciden'); return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (formData.name.length < 3) { toast.error('Nombre demasiado corto'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) { toast.error('Email inválido'); return; }
-    if (!/^[0-9]{7,15}$/.test(formData.phone.replace(/\s/g, ''))) { toast.error('Teléfono inválido'); return; }
-    if (formData.password.length < 6) { toast.error('Contraseña mínimo 6 caracteres'); return; }
-    if (formData.password !== formData.confirmPassword) { toast.error('Las contraseñas no coinciden'); return; }
-
+    if (!validate()) return;
     setLoading(true);
     try {
-      await register({ username: formData.name, email: formData.email, phone: formData.phone, password: formData.password });
-      navigate('/');
+      const result = await register({
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+      });
+      if (result?.emailVerificationRequired) {
+        navigate('/login');
+      } else {
+        navigate('/');
+      }
     } catch {
-      // handled in AuthContext
+      // error handled in AuthContext
     } finally {
       setLoading(false);
     }
@@ -51,7 +73,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel — brand */}
+      {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between w-[45%] bg-surface border-r border-border p-14 relative overflow-hidden">
         <div className="absolute inset-0">
           <img
@@ -61,26 +83,20 @@ const Register = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/60 to-surface/90" />
         </div>
-
         <div className="relative z-10">
           <Link to="/" className="font-heading text-2xl font-black tracking-[0.25em] text-white">ELITE</Link>
         </div>
-
         <div className="relative z-10">
           <p className="text-xs uppercase tracking-widest text-muted mb-4">Únete a la comunidad</p>
-          <h2 className="font-heading text-4xl font-bold leading-tight mb-6">
-            Tu estilo,<br />tu identidad.
-          </h2>
+          <h2 className="font-heading text-4xl font-bold leading-tight mb-6">Tu estilo,<br />tu identidad.</h2>
           <ul className="space-y-3">
             {['Acceso anticipado a nuevas colecciones', 'Descuentos exclusivos para miembros', 'Historial de pedidos y devoluciones'].map(item => (
               <li key={item} className="flex items-center gap-3 text-sm text-muted">
-                <FiCheck size={14} className="text-white flex-shrink-0" />
-                {item}
+                <FiCheck size={14} className="text-white flex-shrink-0" /> {item}
               </li>
             ))}
           </ul>
         </div>
-
         <p className="relative z-10 text-xs text-dim">© {new Date().getFullYear()} ELITE Moda Urbana</p>
       </div>
 
@@ -95,21 +111,53 @@ const Register = () => {
           <p className="text-muted text-sm mb-8">Únete a ELITE y accede a lo mejor de la moda urbana</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Username */}
             <div>
               <label className="form-label">Nombre de usuario</label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} className="input-field" placeholder="Tu nombre" required />
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="sin espacios: juan_perez"
+                autoComplete="username"
+                required
+              />
+              <p className="text-[10px] text-neutral-600 mt-1">Solo letras, números, _ y - (sin espacios)</p>
             </div>
 
+            {/* Email */}
             <div>
               <label className="form-label">Email</label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange} className="input-field" placeholder="tu@correo.com" required />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="tu@correo.com"
+                autoComplete="email"
+                required
+              />
             </div>
 
+            {/* Phone */}
             <div>
               <label className="form-label">Teléfono</label>
-              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="input-field" placeholder="3001234567" required />
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="3001234567"
+                autoComplete="tel"
+                required
+              />
             </div>
 
+            {/* Password */}
             <div>
               <label className="form-label">Contraseña</label>
               <div className="relative">
@@ -119,27 +167,33 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="input-field pr-11"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
+                  autoComplete="new-password"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-muted transition-colors duration-200" aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-muted">
                   {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
               </div>
+
+              {/* Password requirements */}
               {formData.password && (
-                <div className="mt-2 space-y-1">
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="h-1 flex-1 rounded-full transition-all duration-300"
-                        style={{ backgroundColor: i <= strength ? strengthColor : '#262626' }}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs" style={{ color: strengthColor }}>{strengthLabel}</p>
-                </div>
+                <ul className="mt-2 space-y-1">
+                  {PWD_RULES.map(rule => {
+                    const ok = rule.test(formData.password);
+                    return (
+                      <li key={rule.label} className={`flex items-center gap-1.5 text-[11px] ${ok ? 'text-green-500' : 'text-neutral-500'}`}>
+                        {ok ? <FiCheck size={10} /> : <FiX size={10} />}
+                        {rule.label}
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
             </div>
 
+            {/* Confirm password */}
             <div>
               <label className="form-label">Confirmar Contraseña</label>
               <div className="relative">
@@ -148,23 +202,28 @@ const Register = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`input-field pr-11 ${
-                    formData.confirmPassword && formData.password !== formData.confirmPassword
-                      ? 'input-field--error'
-                      : ''
-                  }`}
+                  className={`input-field pr-11 ${formData.confirmPassword && formData.password !== formData.confirmPassword ? 'border-red-500/50' : ''}`}
                   placeholder="Repite la contraseña"
+                  autoComplete="new-password"
                   required
                 />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-muted transition-colors duration-200" aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-muted">
                   {showConfirm ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
               </div>
+              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                <p className="text-[11px] text-red-400 mt-1">Las contraseñas no coinciden</p>
+              )}
             </div>
 
             <div className="pt-2">
-              <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 flex items-center justify-center gap-2 disabled:opacity-50">
-                {loading ? 'Creando cuenta...' : (<>Crear Cuenta <FiArrowRight size={15} /></>)}
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full py-3.5 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? 'Creando cuenta...' : <> Crear Cuenta <FiArrowRight size={15} /> </>}
               </button>
             </div>
           </form>
