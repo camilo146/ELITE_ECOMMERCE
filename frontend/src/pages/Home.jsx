@@ -54,6 +54,9 @@ const Home = () => {
           src="/PORTADA_ELITE.png"
           alt="Colección ELITE"
           className="absolute inset-0 w-full h-full object-cover object-center md:object-[center_30%] select-none pointer-events-none opacity-80"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
         />
         {/* Modern minimal gradient overlay for legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-black/20" />
@@ -168,6 +171,9 @@ const Home = () => {
                 alt="Colección Hombre"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
                 loading="lazy"
+                decoding="async"
+                width="800"
+                height="550"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8 flex items-end justify-between">
@@ -191,6 +197,9 @@ const Home = () => {
                 alt="Colección Mujer"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
                 loading="lazy"
+                decoding="async"
+                width="800"
+                height="550"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8 flex items-end justify-between">
