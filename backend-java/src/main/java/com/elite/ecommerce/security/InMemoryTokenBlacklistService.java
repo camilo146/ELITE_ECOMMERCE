@@ -3,7 +3,6 @@ package com.elite.ecommerce.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Active only when NO StringRedisTemplate bean exists.
  */
 @Service
-@ConditionalOnMissingBean({StringRedisTemplate.class, RedisTokenBlacklistService.class})
+@ConditionalOnMissingBean(TokenBlacklistService.class)
 public class InMemoryTokenBlacklistService implements TokenBlacklistService {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryTokenBlacklistService.class);

@@ -6,7 +6,6 @@ import io.github.bucket4j.Refill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -20,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * NOT shared across multiple instances.
  */
 @Service
-@ConditionalOnMissingBean({StringRedisTemplate.class, RedisRateLimitService.class})
+@ConditionalOnMissingBean(RateLimitService.class)
 public class InMemoryRateLimitService implements RateLimitService {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryRateLimitService.class);

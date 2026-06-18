@@ -2,7 +2,7 @@ package com.elite.ecommerce.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ import java.time.Instant;
  * (i.e., when spring.data.redis.host is configured).
  */
 @Service
-@ConditionalOnBean(StringRedisTemplate.class)
+@ConditionalOnProperty(name = "spring.data.redis.host")
 public class RedisTokenBlacklistService implements TokenBlacklistService {
 
     private static final Logger log = LoggerFactory.getLogger(RedisTokenBlacklistService.class);
