@@ -93,12 +93,13 @@ services:
       - FRONTEND_URL=${FRONTEND_URL}
       - BACKEND_URL=${BACKEND_URL}
 
-      # Email
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      # Email — Resend SMTP
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME:-ÉLITE}
 
       # Observabilidad
-      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_DSN=${SENTRY_DSN:-}
       - EMAIL_VERIFICATION_REQUIRED=true
 
     volumes:
@@ -112,7 +113,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5

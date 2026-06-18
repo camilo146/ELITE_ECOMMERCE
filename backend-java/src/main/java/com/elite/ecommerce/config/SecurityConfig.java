@@ -112,6 +112,8 @@ public class SecurityConfig {
                 .requestMatchers("/uploads/**").permitAll()
                 // Spring error handler
                 .requestMatchers("/error").permitAll()
+                // Actuator health — needed for Docker health check (no sensitive data)
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 // Everything else requires a valid JWT
                 .anyRequest().authenticated()
             )
