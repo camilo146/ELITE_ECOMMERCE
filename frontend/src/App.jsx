@@ -12,6 +12,7 @@ import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -23,7 +24,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <CartProvider>
           <div className="flex flex-col min-h-screen">
@@ -36,7 +37,8 @@ function App() {
                 <Route path="/products" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
-                
+                <Route path="/order-confirmation" element={<OrderConfirmation />} />
+
                 {/* Rutas protegidas */}
                 <Route path="/checkout" element={
                   <ProtectedRoute>
@@ -87,14 +89,15 @@ function App() {
           
           <ToastContainer
             position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
+            autoClose={2500}
+            hideProgressBar
             newestOnTop
             closeOnClick
             rtl={false}
             pauseOnFocusLoss
-            draggable
+            draggable={false}
             pauseOnHover
+            limit={3}
             theme="dark"
           />
         </CartProvider>

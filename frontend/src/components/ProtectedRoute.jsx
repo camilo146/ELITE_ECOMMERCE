@@ -7,7 +7,10 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl">Cargando...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-border border-t-white rounded-full animate-spin" />
+          <span className="text-sm text-muted">Cargando...</span>
+        </div>
       </div>
     );
   }
@@ -16,7 +19,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && user.role !== 'admin') {
+  if (adminOnly && user.role !== 'admin' && user.role !== 'ADMIN') {
     return <Navigate to="/" replace />;
   }
 

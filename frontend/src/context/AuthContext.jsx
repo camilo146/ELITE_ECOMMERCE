@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services';
 import { toast } from 'react-toastify';
 
@@ -6,9 +6,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe ser usado dentro de AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used inside AuthProvider');
   return context;
 };
 
@@ -17,63 +15,71 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si hay usuario en localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Only the non-sensitive profile (id, username, role) is in localStorage.
+    // The JWT lives in an HttpOnly cookie — JS cannot read or steal it.
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      try {
+        setUser(JSON.parse(stored));
+      } catch {
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = async (credentials, token = null) => {
-    try {
-      // Si se pasa userData y token directamente (para actualización de perfil)
-      if (token && typeof credentials === 'object' && !credentials.email) {
-        setUser(credentials);
-        localStorage.setItem('user', JSON.stringify(credentials));
-        return credentials;
-      }
-      
-      // Login normal
-      const data = await authService.login(credentials);
-      setUser(data);
-      toast.success('¡Bienvenido!');
-      return data;
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al iniciar sesión');
-      throw error;
-    }
+  const login = async (credentials) => {
+    const data = await authService.login(credentials);
+    setUser(data);
+    localStorage.setItem('user', JSON.stringify(data));
+    return data;
   };
 
   const register = async (userData) => {
-    try {
-      const data = await authService.register(userData);
-      setUser(data);
-      toast.success('¡Registro exitoso!');
+    const data = await authService.register(userData);
+    if (data.emailVerificationRequired) {
+      // Don't set user — they must verify email before accessing the app
+      toast.info('Registration successful! Please check your email to verify your account.');
       return data;
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al registrarse');
-      throw error;
     }
+    setUser(data);
+    localStorage.setItem('user', JSON.stringify(data));
+    toast.success('Registration successful!');
+    return data;
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
-    toast.info('Sesión cerrada');
+    localStorage.removeItem('user');
+    toast.info('Session closed');
   };
 
-  const updateProfile = async (userData) => {
-    try {
-      const data = await authService.updateProfile(userData);
-      setUser(data);
-      toast.success('Perfil actualizado');
-      return data;
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al actualizar perfil');
-      throw error;
-    }
+  const logoutAll = async () => {
+    await authService.logoutAll();
+    setUser(null);
+    localStorage.removeItem('user');
+    toast.info('All sessions closed');
   };
+
+  /**
+   * Called by the Axios interceptor when a 401 is received.
+   * Attempts to refresh the access token using the refresh token cookie.
+   * If refresh succeeds, updates the stored user profile.
+   * If refresh fails, clears state and redirects to login.
+   */
+  const refreshSession = useCallback(async () => {
+    try {
+      const data = await authService.refresh();
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+      return true;
+    } catch {
+      setUser(null);
+      localStorage.removeItem('user');
+      return false;
+    }
+  }, []);
 
   const value = {
     user,
@@ -81,9 +87,10 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    updateProfile,
+    logoutAll,
+    refreshSession,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin'
+    isAdmin: user?.role?.toUpperCase() === 'ADMIN',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

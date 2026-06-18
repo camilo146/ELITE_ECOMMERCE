@@ -1,56 +1,82 @@
-# Elite E-Commerce
+# ──────────────────────────────────────────────────────────────────────────────
+#  ÉLITE — .gitignore
+# ──────────────────────────────────────────────────────────────────────────────
 
-# Dependencies
-node_modules/
-package-lock.json
-
-# Environment variables
+# ── Secretos / entorno ────────────────────────────────────────────────────────
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
-# Database
-*.sqlite
-*.sqlite3
-*.db
-database.sqlite
+# ── Documentación interna (no va al repo) ────────────────────────────────────
+*.md
+*.MD
 
-# Build outputs
+# ── Archivos temporales / comentados ─────────────────────────────────────────
+BACKEND_COMENTADO.java
+FRONTEND_COMENTADO.js
+*.bat
+railway.json
+
+# ── Dependencias ──────────────────────────────────────────────────────────────
+node_modules/
+**/node_modules/
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+frontend/dist/
+backend-java/target/
 dist/
 build/
 .vite/
+*.class
+*.jar
+!backend-java/src/
+*.war
 
-# Logs
-logs/
+# ── Base de datos ─────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── SSL / Certificados ────────────────────────────────────────────────────────
+ssl/certs/
+ssl/dhparam.pem
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+
+# ── Docker override local ─────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Uploads de usuarios ───────────────────────────────────────────────────────
+uploads/
+backend-java/uploads/
+**/uploads/*
+!**/uploads/.gitkeep
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
 *.log
+logs/
 npm-debug.log*
-yarn-debug.log*
 yarn-error.log*
 
-# IDE
+# ── IDE ───────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
+*.iml
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
 
-# OS
+# ── Sistema operativo ─────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 desktop.ini
+ehthumbs.db
 
-# Uploads (user generated content)
-backend/uploads/*
-!backend/uploads/.gitkeep
-uploads/
-
-# Testing
+# ── Testing / cobertura ───────────────────────────────────────────────────────
 coverage/
 .nyc_output/
-
-# Misc
-*.bak
-*.tmp
-*.temp
+test-results/

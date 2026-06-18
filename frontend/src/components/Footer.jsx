@@ -1,57 +1,102 @@
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-gray-900 border-t border-white/10 mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="border-t border-border bg-bg/50">
+      <div className="container-xl py-16 md:py-20">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 md:gap-10 mb-12 md:mb-16">
+          {/* Brand info */}
+          <div className="col-span-2 md:col-span-2">
+            <Link to="/" className="font-heading text-lg font-light tracking-[0.38em] block mb-5 transition-opacity duration-300 hover:opacity-85">ELITE</Link>
+            <p className="text-xs text-muted leading-relaxed max-w-xs font-light">
+              Diseño contemporáneo y calidad premium. Prendas estructuradas creadas para durar.
+            </p>
+          </div>
+
+          {/* Colecciones */}
+          <div>
+            <h5 className="text-[10px] font-medium uppercase tracking-[0.22em] mb-5 text-neutral-500">Colecciones</h5>
+            <ul className="space-y-3">
+              {[
+                ['Jeans', '/products?category=jeans'],
+                ['Chaquetas', '/products?category=chaquetas'],
+                ['Hoodies', '/products?category=hoodies'],
+                ['Camisetas', '/products?category=camisetas'],
+                ['Joggers', '/products?category=joggers'],
+                ['Ofertas', '/products?sale=true'],
+              ].map(([label, href]) => (
+                <li key={href}>
+                  <Link to={href} className="text-xs text-muted hover:text-white transition-colors duration-300 font-light tracking-wide">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Comprar */}
           <div>
-            <h5 className="font-semibold mb-4">Comprar</h5>
-            <ul className="space-y-2">
-              <li><Link to="/products?category=mujer" className="text-gray-400 hover:text-white transition">Mujer</Link></li>
-              <li><Link to="/products?category=hombre" className="text-gray-400 hover:text-white transition">Hombre</Link></li>
-              <li><Link to="/products?category=zapatos" className="text-gray-400 hover:text-white transition">Zapatos</Link></li>
-              <li><Link to="/products?category=sale" className="text-gray-400 hover:text-white transition">Sale</Link></li>
+            <h5 className="text-[10px] font-medium uppercase tracking-[0.22em] mb-5 text-neutral-500">Comprar</h5>
+            <ul className="space-y-3">
+              {[
+                ['Hombre', '/products?gender=HOMBRE'],
+                ['Mujer', '/products?gender=MUJER'],
+                ['Unisex', '/products?gender=UNISEX'],
+                ['Novedades', '/products?isNew=true'],
+              ].map(([label, href]) => (
+                <li key={href}>
+                  <Link to={href} className="text-xs text-muted hover:text-white transition-colors duration-300 font-light tracking-wide">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Ayuda */}
           <div>
-            <h5 className="font-semibold mb-4">Ayuda</h5>
-            <ul className="space-y-2">
-              <li><Link to="/orders" className="text-gray-400 hover:text-white transition">Estado del pedido</Link></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Envíos</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Devoluciones</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Contacto</a></li>
+            <h5 className="text-[10px] font-medium uppercase tracking-[0.22em] mb-5 text-neutral-500">Ayuda</h5>
+            <ul className="space-y-3">
+              {[
+                ['Mis Pedidos', '/orders'],
+                ['Guía de Tallas', '#'],
+                ['Envíos', '#'],
+                ['Devoluciones', '#'],
+                ['Contacto', '#'],
+              ].map(([label, href]) => (
+                <li key={label}>
+                  <Link to={href} className="text-xs text-muted hover:text-white transition-colors duration-300 font-light tracking-wide">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Sobre Nosotros */}
+          {/* Social */}
           <div>
-            <h5 className="font-semibold mb-4">Sobre Nosotros</h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Nuestra historia</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Sostenibilidad</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Carreras</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Prensa</a></li>
-            </ul>
-          </div>
-
-          {/* Síguenos */}
-          <div>
-            <h5 className="font-semibold mb-4">Síguenos</h5>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Instagram</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Facebook</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">Twitter</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition">TikTok</a></li>
+            <h5 className="text-[10px] font-medium uppercase tracking-[0.22em] mb-5 text-neutral-500">Síguenos</h5>
+            <ul className="space-y-3">
+              {[['Instagram', '#'], ['TikTok', '#'], ['Facebook', '#'], ['Pinterest', '#']].map(([label, href]) => (
+                <li key={label}>
+                  <a href={href} className="text-xs text-muted hover:text-white transition-colors duration-300 font-light tracking-wide">
+                    {label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400 text-sm">
-          <p>&copy; 2025 ÉLITE Fashion Store. Todos los derechos reservados.</p>
+        <div className="border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[10px] tracking-wider text-dim">© {year} ELITE. Todos los derechos reservados.</p>
+          <div className="flex gap-6">
+            <a href="#" className="text-[10px] tracking-wider text-dim hover:text-muted transition-colors duration-300">Privacidad</a>
+            <a href="#" className="text-[10px] tracking-wider text-dim hover:text-muted transition-colors duration-300">Términos</a>
+            <a href="#" className="text-[10px] tracking-wider text-dim hover:text-muted transition-colors duration-300">Cookies</a>
+          </div>
         </div>
       </div>
     </footer>

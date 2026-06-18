@@ -2,114 +2,154 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import { FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
-    // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
-      toast.error('Por favor ingresa un email válido');
+      toast.error('Email inválido');
       return;
     }
-
-    // Validar contraseña no vacía
     if (!formData.password.trim()) {
-      toast.error('Por favor ingresa tu contraseña');
+      toast.error('Ingresa tu contraseña');
       return;
     }
-
     setLoading(true);
     try {
-      // Limpiar espacios en blanco del email y password
-      const cleanFormData = {
+      const userData = await login({
         email: formData.email.trim(),
-        password: formData.password.trim()
-      };
-      const userData = await login(cleanFormData);
-      
-      toast.success(`¡Bienvenido ${userData.name}!`);
-      
-      // Redirigir al admin panel si es administrador
-      if (userData.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
-    } catch (error) {
-      console.error(error);
-      // El error ya se muestra en el contexto AuthContext
+        password: formData.password.trim(),
+      });
+      toast.success(`Bienvenido, ${userData.name || userData.username}`);
+      if (userData.role === 'admin' || userData.role === 'ADMIN') navigate('/admin');
+      else navigate('/');
+    } catch {
+      // error handled in AuthContext
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pt-16">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold mb-2">Iniciar Sesión</h2>
-          <p className="text-gray-400">Bienvenido de vuelta</p>
+    <div className="min-h-screen flex">
+      {/* Left panel — brand (desktop only) */}
+      <div className="hidden lg:flex flex-col justify-between w-[45%] bg-surface border-r border-border p-14 relative overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&h=1200&fit=crop&auto=format&q=75"
+            alt=""
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-surface/80 via-surface/60 to-surface/90" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
+        {/* Content */}
+        <div className="relative z-10">
+          <Link to="/" className="font-heading text-2xl font-black tracking-[0.25em] text-white">ELITE</Link>
+        </div>
+
+        <div className="relative z-10">
+          <p className="text-xs uppercase tracking-widest text-muted mb-4">Temporada 2025</p>
+          <h2 className="font-heading text-4xl font-bold leading-tight mb-4">
+            Moda que<br />te define.
+          </h2>
+          <p className="text-muted text-sm max-w-xs leading-relaxed">
+            Accede a tu cuenta y descubre las últimas colecciones de ropa urbana premium.
+          </p>
+        </div>
+
+        <p className="relative z-10 text-xs text-dim">© {new Date().getFullYear()} ELITE Moda Urbana</p>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-bg">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-10">
+            <Link to="/" className="font-heading text-2xl font-black tracking-[0.25em] text-white">ELITE</Link>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="input-field"
-              required
-            />
+          <h1 className="font-heading text-2xl font-bold mb-1">Iniciar Sesión</h1>
+          <p className="text-muted text-sm mb-8">Bienvenido de vuelta</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="tu@correo.com"
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="form-label mb-0">Contraseña</label>
+                <a href="#" className="text-xs text-dim hover:text-muted transition-colors">¿Olvidaste tu contraseña?</a>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="input-field pr-11"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dim hover:text-muted transition-colors duration-200"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full py-3.5 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {loading ? 'Ingresando...' : (
+                  <>Entrar <FiArrowRight size={15} /></>
+                )}
+              </button>
+            </div>
+          </form>
+
+          <p className="text-center mt-6 text-sm text-muted">
+            ¿No tienes cuenta?{' '}
+            <Link to="/register" className="text-white font-semibold hover:underline underline-offset-2">
+              Regístrate
+            </Link>
+          </p>
+
+          <div className="mt-8 p-3 border border-border/60 rounded-[var(--radius-md)] bg-surface/40">
+            <p className="text-[10px] text-dim uppercase tracking-[0.2em] mb-1.5">Demo</p>
+            <p className="text-[11px] text-dim font-mono leading-relaxed">admin@elite.com / admin123</p>
+            <p className="text-[11px] text-dim font-mono leading-relaxed">user@elite.com / user123</p>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary"
-          >
-            {loading ? 'Cargando...' : 'Entrar'}
-          </button>
-        </form>
-
-        <p className="text-center mt-6 text-gray-400">
-          ¿No tienes cuenta?{' '}
-          <Link to="/register" className="text-white hover:underline">
-            Regístrate
-          </Link>
-        </p>
-
-        <div className="mt-8 p-4 bg-blue-900/20 rounded-lg border border-blue-500/30">
-          <p className="text-sm text-blue-300 mb-2">Cuentas de prueba:</p>
-          <p className="text-xs text-gray-400">Admin: admin@elite.com / admin123</p>
-          <p className="text-xs text-gray-400">User: user@elite.com / user123</p>
         </div>
       </div>
     </div>

@@ -19,76 +19,93 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [products, orders, users] = await Promise.all([
-        productService.getProducts({ limit: 1 }),
-        orderService.getAllOrders({ limit: 1 }),
-        userService.getUsers({ limit: 1 })
-      ]);
+      // Obtener productos
+      const productsData = await productService.getProducts({ limit: 1 });
+      const totalProducts = Array.isArray(productsData) ? productsData.length : (productsData.total || 0);
+
+      // Obtener usuarios (si falla, asumimos 0 para no romper el dashboard)
+      let totalUsers = 0;
+      try {
+        const usersData = await userService.getUsers({ limit: 1 });
+        totalUsers = Array.isArray(usersData) ? usersData.length : (usersData.total || 0);
+      } catch (e) {
+        console.warn('No se pudieron cargar usuarios:', e);
+      }
+
+      // Obtener pedidos (si falla, asumimos 0)
+      let totalOrders = 0;
+      try {
+        const ordersData = await orderService.getAllOrders({ limit: 1 });
+        totalOrders = Array.isArray(ordersData) ? ordersData.length : (ordersData.total || 0);
+      } catch (e) {
+        console.warn('No se pudieron cargar pedidos:', e);
+      }
 
       setStats({
-        totalProducts: products.total || 0,
-        totalOrders: orders.total || 0,
-        totalUsers: users.total || 0,
-        totalRevenue: 0 // Calcular desde orders si es necesario
+        totalProducts,
+        totalOrders,
+        totalUsers,
+        totalRevenue: 0 
       });
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error general en dashboard:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const statCards = [
-    { title: 'Total Productos', value: stats.totalProducts, icon: FiPackage, color: 'from-blue-500 to-cyan-500', link: '/admin/products' },
-    { title: 'Total Pedidos', value: stats.totalOrders, icon: FiShoppingBag, color: 'from-purple-500 to-pink-500', link: '/admin/orders' },
-    { title: 'Total Usuarios', value: stats.totalUsers, icon: FiUsers, color: 'from-green-500 to-teal-500', link: '/admin/users' },
-    { title: 'Gestión Financiera', value: formatPrice(stats.totalRevenue), icon: FiDollarSign, color: 'from-yellow-500 to-orange-500', link: '/admin/finance' }
+    { title: 'Productos', value: stats.totalProducts, icon: FiPackage, link: '/admin/products' },
+    { title: 'Pedidos', value: stats.totalOrders, icon: FiShoppingBag, link: '/admin/orders' },
+    { title: 'Usuarios', value: stats.totalUsers, icon: FiUsers, link: '/admin/users' },
+    { title: 'Ingresos', value: formatPrice(stats.totalRevenue), icon: FiDollarSign, link: '/admin/finance' }
   ];
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center pt-16">Cargando...</div>;
+    return (
+      <div className="min-h-screen pt-8 pb-20">
+        <div className="container-xl">
+          <div className="skeleton h-10 w-64 mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => <div key={i} className="card skeleton h-32" />)}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-20">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Panel de Administración</h1>
-          <Link to="/" className="btn-secondary">Volver a la Tienda</Link>
+    <div className="min-h-screen pt-8 pb-20">
+      <div className="container-xl">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+          <h1 className="page-header">Panel Admin</h1>
+          <Link to="/" className="btn-secondary self-start">Volver a la Tienda</Link>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
           {statCards.map((stat, index) => (
-            <Link key={index} to={stat.link} className="card group hover:scale-105">
-              <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center mb-4`}>
-                <stat.icon className="text-white" size={24} />
+            <Link key={index} to={stat.link} className="card group hover:border-border-light transition-colors duration-200">
+              <div className="w-10 h-10 bg-surface2 border border-border rounded-[var(--radius-md)] flex items-center justify-center mb-4 group-hover:border-border-light transition-colors duration-200">
+                <stat.icon className="text-muted group-hover:text-white transition-colors duration-200" size={20} />
               </div>
-              <p className="text-gray-400 text-sm mb-1">{stat.title}</p>
-              <p className="text-3xl font-bold">{stat.value}</p>
+              <p className="text-xs text-dim uppercase tracking-[0.15em] mb-1">{stat.title}</p>
+              <p className="text-2xl font-bold">{stat.value}</p>
             </Link>
           ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link to="/admin/products" className="card text-center p-8 hover:scale-105">
-            <FiPackage size={48} className="mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">Gestionar Productos</h3>
-            <p className="text-gray-400">Crear, editar y eliminar productos</p>
-          </Link>
-
-          <Link to="/admin/orders" className="card text-center p-8 hover:scale-105">
-            <FiShoppingBag size={48} className="mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">Gestionar Pedidos</h3>
-            <p className="text-gray-400">Ver y actualizar estados de pedidos</p>
-          </Link>
-
-          <Link to="/admin/users" className="card text-center p-8 hover:scale-105">
-            <FiUsers size={48} className="mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">Gestionar Usuarios</h3>
-            <p className="text-gray-400">Administrar usuarios y permisos</p>
-          </Link>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          {[
+            { to: '/admin/products', icon: FiPackage, title: 'Productos', desc: 'Crear, editar y eliminar' },
+            { to: '/admin/orders', icon: FiShoppingBag, title: 'Pedidos', desc: 'Estados y seguimiento' },
+            { to: '/admin/users', icon: FiUsers, title: 'Usuarios', desc: 'Cuentas y permisos' },
+          ].map(({ to, icon: Icon, title, desc }) => (
+            <Link key={to} to={to} className="card text-center p-8 hover:border-border-light transition-colors duration-200 group">
+              <Icon size={32} strokeWidth={1.5} className="mx-auto mb-4 text-muted group-hover:text-white transition-colors duration-200" />
+              <h3 className="font-heading text-lg font-semibold mb-1">{title}</h3>
+              <p className="text-xs text-muted">{desc}</p>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

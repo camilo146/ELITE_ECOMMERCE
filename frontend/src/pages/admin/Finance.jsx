@@ -63,10 +63,13 @@ const Finance = () => {
         transactionService.getAll({ ...filters, limit: 100 }),
         transactionService.getSummary(filters)
       ]);
-      setTransactions(transData.transactions);
+      // Manejar si el backend devuelve un array directo o un objeto con propiedad transactions
+      setTransactions(Array.isArray(transData) ? transData : (transData.transactions || []));
       setSummary(summaryData);
     } catch (error) {
+      console.error(error);
       toast.error('Error al cargar datos financieros');
+      setTransactions([]); // Asegurar que sea un array en caso de error
     } finally {
       setLoading(false);
     }
@@ -183,7 +186,7 @@ const Finance = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center pt-16">Cargando...</div>;
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-20">
+    <div className="min-h-screen pt-8 pb-20">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -299,13 +302,13 @@ const Finance = () => {
         <div className="card">
           <h3 className="text-lg font-bold mb-4">Transacciones</h3>
           
-          {transactions.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">No hay transacciones</p>
+          {!transactions || transactions.length === 0 ? (
+            <p className="text-muted text-center py-8">No hay transacciones</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-700">
+                  <tr className="border-b border-border">
                     <th className="text-left py-3 px-2">Fecha</th>
                     <th className="text-left py-3 px-2">Tipo</th>
                     <th className="text-left py-3 px-2">Categoría</th>
@@ -316,7 +319,7 @@ const Finance = () => {
                 </thead>
                 <tbody>
                   {transactions.map(transaction => (
-                    <tr key={transaction.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                    <tr key={transaction.id} className="border-b border-border hover:bg-surface2/50">
                       <td className="py-3 px-2 text-sm">
                         {new Date(transaction.transactionDate).toLocaleDateString('es-ES')}
                       </td>
@@ -359,7 +362,7 @@ const Finance = () => {
         {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-2xl font-bold mb-4">
                 {editingTransaction ? 'Editar Transacción' : 'Nueva Transacción'}
               </h2>
