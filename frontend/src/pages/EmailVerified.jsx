@@ -1,4 +1,4 @@
-﻿import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { FiCheckCircle, FiXCircle, FiClock, FiArrowRight } from 'react-icons/fi';
 import { useState } from 'react';
 import { authService } from '../services';
