@@ -1,4 +1,4 @@
-package com.elite.ecommerce.service;
+﻿package com.elite.ecommerce.service;
 
 import com.elite.ecommerce.model.Order;
 import com.elite.ecommerce.model.OrderItem;
@@ -41,7 +41,7 @@ public class EmailService {
     @Value("${app.mail.from:onboarding@resend.dev}")
     private String fromAddress;
 
-    @Value("${app.mail.from-name:ÉLITE}")
+    @Value("${app.mail.from-name:ELITE}")
     private String fromName;
 
     @Value("${app.frontend.url:http://localhost:5173}")
@@ -58,19 +58,19 @@ public class EmailService {
 
     @Async
     public void sendWelcome(User user) {
-        send(user.getEmail(), "Bienvenido a ÉLITE", buildWelcomeHtml(user.getUsername()));
+        send(user.getEmail(), "Bienvenido a ELITE", buildWelcomeHtml(user.getUsername()));
     }
 
     @Async
     public void sendEmailVerification(String toEmail, String username, String rawToken) {
         String url = backendUrl + "/api/auth/verify-email?token=" + rawToken;
-        send(toEmail, "Verifica tu cuenta ÉLITE", buildVerificationHtml(username, url));
+        send(toEmail, "Verifica tu cuenta ELITE", buildVerificationHtml(username, url));
     }
 
     @Async
     public void sendPasswordReset(String toEmail, String username, String rawToken) {
         String url = frontendUrl + "/reset-password?token=" + rawToken;
-        send(toEmail, "Restablecer contraseña — ÉLITE", buildPasswordResetHtml(username, url));
+        send(toEmail, "Restablecer contraseña — ELITE", buildPasswordResetHtml(username, url));
     }
 
     // ── Emails de pedidos ─────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ public class EmailService {
     @Async
     public void sendOrderCreated(Order order) {
         send(order.getUser().getEmail(),
-                "Pedido #" + order.getId() + " recibido — ÉLITE",
+                "Pedido #" + order.getId() + " recibido — ELITE",
                 buildOrderCreatedHtml(customerName(order), order));
     }
 
@@ -142,10 +142,10 @@ public class EmailService {
     // ── Plantillas HTML ───────────────────────────────────────────────────────
 
     private String buildWelcomeHtml(String username) {
-        return layout("Bienvenido a ÉLITE", """
+        return layout("Bienvenido a ELITE", """
             <h1 style="color:#fff;font-size:22px;font-weight:300;margin:0 0 16px;">Bienvenido, %s</h1>
             <p style="color:#999;font-size:14px;line-height:1.8;margin:0 0 24px;">
-              Tu cuenta en <strong style="color:#fff;">ÉLITE</strong> ha sido creada exitosamente.<br>
+              Tu cuenta en <strong style="color:#fff;">ELITE</strong> ha sido creada exitosamente.<br>
               Explora nuestra colección de moda urbana y encuentra tu estilo.
             </p>
             <a href="%s/products" style="%s">Ver Colección</a>
@@ -158,7 +158,7 @@ public class EmailService {
             <h1 style="color:#fff;font-size:22px;font-weight:300;margin:0 0 16px;">Verifica tu correo</h1>
             <p style="color:#999;font-size:14px;line-height:1.8;margin:0 0 24px;">
               Hola <strong style="color:#ddd;">%s</strong>,<br>
-              Haz clic en el botón para activar tu cuenta ÉLITE.
+              Haz clic en el botón para activar tu cuenta ELITE.
             </p>
             <a href="%s" style="%s">Verificar Correo</a>
             <p style="color:#555;font-size:11px;margin:28px 0 0;line-height:1.6;">
@@ -280,19 +280,19 @@ public class EmailService {
         return """
             <!DOCTYPE html><html lang="es">
             <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-            <title>%s — ÉLITE</title></head>
+            <title>%s — ELITE</title></head>
             <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
               <table width="100%%" cellpadding="0" cellspacing="0" style="padding:40px 16px;">
                 <tr><td align="center">
                   <table width="560" cellpadding="0" cellspacing="0"
                     style="background:#111;border:1px solid #222;max-width:560px;width:100%%;">
                     <tr><td style="padding:32px 40px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">
-                      <span style="font-size:18px;font-weight:300;letter-spacing:0.45em;color:#fff;text-transform:uppercase;">ÉLITE</span>
+                      <span style="font-size:18px;font-weight:300;letter-spacing:0.45em;color:#fff;text-transform:uppercase;">ELITE</span>
                     </td></tr>
                     <tr><td style="padding:40px;">%s</td></tr>
                     <tr><td style="padding:20px 40px;border-top:1px solid #1e1e1e;text-align:center;">
                       <p style="margin:0;color:#444;font-size:11px;">
-                        ÉLITE — Moda Urbana<br>
+                        ELITE — Moda Urbana<br>
                         <a href="%s" style="color:#555;text-decoration:none;">%s</a>
                       </p>
                     </td></tr>

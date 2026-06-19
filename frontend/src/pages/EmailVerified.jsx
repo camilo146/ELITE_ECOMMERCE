@@ -1,4 +1,4 @@
-import { useSearchParams, Link } from 'react-router-dom';
+﻿import { useSearchParams, Link } from 'react-router-dom';
 import { FiCheckCircle, FiXCircle, FiClock, FiArrowRight } from 'react-icons/fi';
 import { useState } from 'react';
 import { authService } from '../services';
@@ -58,7 +58,7 @@ const EmailVerified = () => {
       <div className="max-w-md w-full text-center">
         <div className="mb-6">
           <Link to="/" className="font-heading text-lg font-light tracking-[0.38em] text-white uppercase">
-            ÉLITE
+            ELITE
           </Link>
         </div>
 

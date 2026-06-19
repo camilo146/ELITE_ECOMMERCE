@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../services';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
@@ -28,7 +28,7 @@ const ForgotPassword = () => {
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <Link to="/" className="font-heading text-lg font-light tracking-[0.38em] text-white uppercase">
-            ÉLITE
+            ELITE
           </Link>
         </div>
 

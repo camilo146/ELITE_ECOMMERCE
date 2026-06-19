@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+﻿import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authService } from '../services';
 import { toast } from 'react-toastify';
 
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       }
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
-      toast.success('¡Registro exitoso! Bienvenido a ÉLITE.');
+      toast.success('¡Registro exitoso! Bienvenido a ELITE.');
       return data;
     } catch (error) {
       // Muestra el primer error de validación del backend si existe
