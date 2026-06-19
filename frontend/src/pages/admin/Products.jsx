@@ -198,7 +198,7 @@ const AdminProducts = () => {
     setUploadingImages(true);
     try {
       const results = await Promise.all(files.map(f => uploadService.uploadImage(f)));
-      const uploadedUrls = results.map(r => `http://localhost:8080${r.imageUrl}`);
+      const uploadedUrls = results.map(r => r.imageUrl);
       const newUrls = [...imageUrls.filter(u => u.trim()), ...uploadedUrls];
       setImageUrls(newUrls);
       setFormData(prev => ({ ...prev, images: newUrls }));
