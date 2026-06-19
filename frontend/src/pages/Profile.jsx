@@ -62,7 +62,8 @@ const Profile = () => {
     try {
       setUploading(true);
       const response = await uploadService.uploadImage(file, true);
-      const imageUrl = `http://localhost:8080${response.imageUrl}`;
+      // Usar ruta relativa — Nginx proxea /uploads al backend
+      const imageUrl = response.imageUrl; // ya viene como "/uploads/..."
       setFormData(prev => ({ ...prev, profileImage: imageUrl }));
       toast.success('Foto actualizada');
     } catch (error) {
