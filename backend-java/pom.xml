@@ -125,6 +125,12 @@
 			<artifactId>tika-core</artifactId>
 			<version>2.9.2</version>
 		</dependency>
+		<!-- Image resizing and compression on upload -->
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>0.4.20</version>
+		</dependency>
 		<!-- Redis: distributed blacklist, rate limiting, session store -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -1,25 +1,23 @@
 package com.elite.ecommerce.controller;
 
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @RestController
@@ -31,14 +29,9 @@ public class UploadController {
     private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp", "image/gif"
     );
-    private static final Map<String, String> MIME_TO_EXTENSION = Map.of(
-            "image/jpeg", ".jpg",
-            "image/png",  ".png",
-            "image/webp", ".webp",
-            "image/gif",  ".gif"
-    );
-    // Límite real configurado en spring.servlet.multipart.max-file-size (50 MB)
     private static final long MAX_FILE_SIZE_BYTES = 50L * 1024 * 1024;
+    private static final int  MAX_DIMENSION        = 1400;
+    private static final float OUTPUT_QUALITY      = 0.85f;
 
     private final Path rootLocation;
     private final Tika tika = new Tika();
@@ -77,44 +70,6 @@ public class UploadController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/{filename:.+}")
-    @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        // ── Path traversal prevention ─────────────────────────────────────
-        Path filePath = rootLocation.resolve(filename).normalize().toAbsolutePath();
-
-        if (!filePath.startsWith(rootLocation)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
-        }
-
-        try {
-            Resource resource = new UrlResource(filePath.toUri());
-            if (!resource.exists() || !resource.isReadable()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
-            }
-
-            // Detect actual content type from file contents
-            String contentType = tika.detect(filePath.toFile());
-            if (!ALLOWED_MIME_TYPES.contains(contentType)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "File type not permitted");
-            }
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, contentType)
-                    // Inline for images — prevents download dialog
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                    // Prevent the browser from executing served content as script
-                    .header("X-Content-Type-Options", "nosniff")
-                    .header("Content-Security-Policy", "default-src 'none'")
-                    .body(resource);
-
-        } catch (MalformedURLException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found");
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not read file");
-        }
-    }
-
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private Map<String, String> storeFile(MultipartFile file) {
@@ -126,37 +81,57 @@ public class UploadController {
                     "File too large. Maximum size is 50MB");
         }
 
-        // ── Detect MIME type from magic bytes — not from client Content-Type ─
-        String detectedMime;
+        // Read bytes once — reused for Tika detection and ImageIO decode
+        byte[] fileBytes;
         try {
-            detectedMime = tika.detect(file.getInputStream());
+            fileBytes = file.getBytes();
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not read file");
         }
 
+        // ── Validate MIME from magic bytes — never trust client Content-Type ─
+        String detectedMime = tika.detect(fileBytes);
         if (!ALLOWED_MIME_TYPES.contains(detectedMime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Only JPEG, PNG, WebP, and GIF images are allowed");
         }
 
-        // ── Generate safe filename — never use getOriginalFilename() for path ─
-        String safeExtension = MIME_TO_EXTENSION.get(detectedMime);
-        String safeFilename = UUID.randomUUID().toString() + safeExtension;
+        // ── Decode image ──────────────────────────────────────────────────────
+        BufferedImage img;
+        try {
+            img = ImageIO.read(new ByteArrayInputStream(fileBytes));
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not decode image");
+        }
+        if (img == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unreadable image format");
+        }
 
+        // ── Safe destination — always output JPEG ─────────────────────────────
+        String safeFilename = UUID.randomUUID() + ".jpg";
         Path destination = rootLocation.resolve(safeFilename).normalize().toAbsolutePath();
-
-        // Final path traversal check
         if (!destination.startsWith(rootLocation)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid file path");
         }
 
+        // ── Resize + compress ─────────────────────────────────────────────────
+        // Downscale only: images smaller than MAX_DIMENSION are kept at original size.
         try {
-            Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+            int w = img.getWidth();
+            int h = img.getHeight();
+            var builder = Thumbnails.of(img).outputFormat("jpeg").outputQuality(OUTPUT_QUALITY);
+            if (w > MAX_DIMENSION || h > MAX_DIMENSION) {
+                builder.size(MAX_DIMENSION, MAX_DIMENSION);
+            } else {
+                builder.scale(1.0);
+            }
+            builder.toFile(destination.toFile());
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to process image");
         }
 
-        log.info("File uploaded: {}", safeFilename);
+        log.info("Image stored ({}x{} → max {}px, q{}): {}", img.getWidth(), img.getHeight(),
+                MAX_DIMENSION, OUTPUT_QUALITY, safeFilename);
         return Map.of("imageUrl", "/uploads/" + safeFilename);
     }
 }
