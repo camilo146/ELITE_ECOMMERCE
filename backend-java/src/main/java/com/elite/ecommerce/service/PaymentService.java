@@ -68,10 +68,11 @@ public class PaymentService {
                 items.add(itemRequest);
             }
 
+            // MP agrega automáticamente: ?collection_id=&collection_status=&payment_id=&status=&external_reference=
             PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                    .success(frontendUrl + "/order-confirmation")
-                    .pending(frontendUrl + "/order-confirmation")
-                    .failure(frontendUrl + "/order-confirmation")
+                    .success(frontendUrl + "/order-confirmation?status=approved")
+                    .pending(frontendUrl + "/order-confirmation?status=pending")
+                    .failure(frontendUrl + "/order-confirmation?status=failure")
                     .build();
 
             String[] nameParts = parseName(order);
@@ -85,15 +86,18 @@ public class PaymentService {
 
             PreferencePaymentMethodsRequest paymentMethods = PreferencePaymentMethodsRequest.builder()
                     .installments(12)
+                    // No excluir ningún método — mostrar todos los disponibles (PSE, Nequi, etc.)
                     .build();
 
             PreferenceRequest request = PreferenceRequest.builder()
                     .items(items)
                     .backUrls(backUrls)
+                    .autoReturn("approved") // redirige automáticamente al pagar
                     .payer(payer)
                     .paymentMethods(paymentMethods)
                     .notificationUrl(backendUrl + "/api/payments/notifications")
                     .externalReference(String.valueOf(order.getId()))
+                    .statementDescriptor("ELITE")
                     .build();
 
             Preference preference = preferenceClient.create(request);
