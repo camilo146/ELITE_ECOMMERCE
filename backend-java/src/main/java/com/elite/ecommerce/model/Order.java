@@ -23,8 +23,9 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "order_id")
+    // mappedBy = "order" indica que OrderItem.order es el dueño de la FK
+    // Hibernate ahora inserta order_id directamente en el INSERT, no en UPDATE posterior
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
 

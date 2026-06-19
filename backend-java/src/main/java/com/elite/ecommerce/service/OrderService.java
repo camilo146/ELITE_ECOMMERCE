@@ -94,10 +94,16 @@ public class OrderService {
 
         Order order = new Order();
         order.setUser(user);
-        order.setItems(items);
         order.setTotalAmount(serverComputedTotal);
         order.setPaymentMethod(dto.getPaymentMethod());
         order.setShippingAddress(mapAddress(dto.getShippingAddress()));
+
+        // Asignar la referencia bidireccional ANTES de agregar a la lista
+        // Hibernate necesita order_id al momento del INSERT (no puede hacer UPDATE posterior con NOT NULL)
+        for (OrderItem item : items) {
+            item.setOrder(order);
+        }
+        order.setItems(items);
 
         if (isMercadoPago) {
             order.setOrderStatus(OrderStatus.PENDING_PAYMENT);
