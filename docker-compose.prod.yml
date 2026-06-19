@@ -146,6 +146,8 @@ services:
       # Certificados SSL (generados con Certbot)
       - ./ssl/certs:/etc/nginx/ssl:ro
       - ./ssl/dhparam.pem:/etc/nginx/dhparam.pem:ro
+      # Uploads compartidos: Nginx sirve las imágenes directamente sin pasar por Spring Boot
+      - backend_uploads:/usr/share/nginx/uploads:ro
     networks:
       - frontend-net
     depends_on:
