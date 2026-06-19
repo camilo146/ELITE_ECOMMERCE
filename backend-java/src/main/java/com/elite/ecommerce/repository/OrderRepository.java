@@ -22,8 +22,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "ORDER BY o.createdAt DESC")
     List<Order> findByUserIdWithItems(@Param("userId") Long userId);
 
-    // Paginated admin view — items NOT fetched here (lazy is fine for list views)
-    Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    // Step 1: paginated IDs only (no collection fetch = no HHH90003004 warning)
+    @Query("SELECT o.id FROM Order o ORDER BY o.createdAt DESC")
+    Page<Long> findAllOrderIds(Pageable pageable);
+
+    // Step 2: full graph for those IDs (no LIMIT/OFFSET here — safe with JOIN FETCH)
+    @Query("SELECT DISTINCT o FROM Order o " +
+           "LEFT JOIN FETCH o.items i " +
+           "LEFT JOIN FETCH i.product " +
+           "WHERE o.id IN :ids " +
+           "ORDER BY o.createdAt DESC")
+    List<Order> findAllWithItemsByIds(@Param("ids") List<Long> ids);
 
     // Single order with full item graph — used by payment and order detail
     @Query("SELECT o FROM Order o " +

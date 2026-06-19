@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
@@ -181,7 +183,15 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Page<Order> getAllOrders(Pageable pageable) {
-        return orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        // Step 1: paginated IDs — avoids HHH90003004 (LIMIT applied to JOIN FETCH)
+        Page<Long> idPage = orderRepository.findAllOrderIds(pageable);
+        if (idPage.isEmpty()) return Page.empty(pageable);
+
+        // Step 2: fetch full graph (items + products) for this page's IDs only
+        List<Order> orders = orderRepository.findAllWithItemsByIds(idPage.getContent());
+        orders.sort(Comparator.comparing(Order::getCreatedAt).reversed());
+
+        return new PageImpl<>(orders, pageable, idPage.getTotalElements());
     }
 
     @Transactional(readOnly = true)
