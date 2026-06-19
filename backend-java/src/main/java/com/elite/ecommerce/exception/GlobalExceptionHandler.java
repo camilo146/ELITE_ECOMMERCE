@@ -77,6 +77,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException e) {
+        // Si la causa raíz es una ResponseStatusException, usamos su status
+        if (e.getCause() instanceof ResponseStatusException rse) {
+            return ResponseEntity.status(rse.getStatusCode())
+                    .body(Map.of("error", rse.getReason() != null ? rse.getReason() : "Error"));
+        }
         log.error("Unhandled RuntimeException: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "An unexpected error occurred"));

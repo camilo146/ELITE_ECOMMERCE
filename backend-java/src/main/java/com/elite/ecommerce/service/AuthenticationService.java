@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @Service
@@ -48,7 +49,8 @@ public class AuthenticationService {
             repository.existsByUsername(request.getUsername())) {
             // Still log for abuse detection — a real attacker will see the vague message
             log.warn("Register attempt for existing email/username from ip={}", ip);
-            throw new RuntimeException("Registration failed. Please check your details.");
+            // 409 Conflict — no 500. El GlobalExceptionHandler lo devuelve correctamente.
+            throw new ResponseStatusException(CONFLICT, "El email o nombre de usuario ya está registrado.");
         }
 
         User user = User.builder()
