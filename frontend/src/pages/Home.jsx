@@ -20,7 +20,7 @@ const CATEGORY_TILES = [
   },
   {
     label: 'Bermudas', href: '/products?category=bermudas',
-    img: '/portada_categoria_bermud.png',
+    img: '/portada_categoria_bermuda.png',
   },
   {
     label: 'Hoodies', href: '/products?category=hoodies',
