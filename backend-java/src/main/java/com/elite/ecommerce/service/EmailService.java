@@ -134,8 +134,12 @@ public class EmailService {
 
             log.info("Email enviado via Resend API: '{}' → {}", subject, maskEmail(to));
 
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            // Log full Resend response body so the actual error reason is visible in logs
+            log.error("Resend API rechazó el email '{}' to '{}': status={} body={}",
+                    subject, maskEmail(to), e.getStatusCode(), e.getResponseBodyAsString());
         } catch (Exception e) {
-            log.error("Error al enviar email '{}' to '{}': {}", subject, maskEmail(to), e.getMessage());
+            log.error("Error de red al enviar email '{}' to '{}': {}", subject, maskEmail(to), e.getMessage());
         }
     }
 

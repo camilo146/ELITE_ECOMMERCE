@@ -33,13 +33,8 @@ const Login = () => {
       toast.success(`Bienvenido, ${userData.name || userData.username}`);
       if (userData.role === 'admin' || userData.role === 'ADMIN') navigate('/admin');
       else navigate('/');
-    } catch (err) {
-      const status = err.response?.status;
-      const msg = err.response?.data?.error || '';
-      if (status === 403 && msg.toLowerCase().includes('verify')) {
-        toast.warning('Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.');
-      }
-      // otros errores los maneja AuthContext
+    } catch {
+      // Errors handled in AuthContext (toast already shown there)
     } finally {
       setLoading(false);
     }
