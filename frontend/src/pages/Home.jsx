@@ -83,8 +83,29 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ── NEW ARRIVALS ───────────────────────────────────── */}
+      {newProducts.length > 0 && (
+        <section className="section bg-surface/10 py-16 md:py-24">
+          <div className="container-xl">
+            <div className="flex items-end justify-between mb-10 pb-4 border-b border-border/30">
+              <div>
+                <p className="text-[9px] text-neutral-500 uppercase tracking-[0.2em] mb-1">Recién llegado</p>
+                <h2 className="text-xl sm:text-2xl font-light tracking-[0.1em] uppercase">Nueva Colección</h2>
+              </div>
+              <Link to="/products?isNew=true" className="flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors uppercase tracking-wider">
+                Ver todo <FiArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {newProducts.map(p => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── CATEGORIES GRID ────────────────────────────────── */}
-      <section className="section bg-bg py-16 md:py-24">
+      <section className="section bg-bg py-16 md:py-24 border-t border-border/40">
         <div className="container-xl">
           <div className="flex items-end justify-between mb-10 border-b border-border/40 pb-4">
             <div>
@@ -173,27 +194,6 @@ const Home = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {featuredProducts.map(p => <ProductCard key={p.id} product={p} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── NEW ARRIVALS ───────────────────────────────────── */}
-      {newProducts.length > 0 && (
-        <section className="section bg-surface/10 py-16 md:py-24 border-t border-border/40">
-          <div className="container-xl">
-            <div className="flex items-end justify-between mb-10 pb-4 border-b border-border/30">
-              <div>
-                <p className="text-[9px] text-neutral-500 uppercase tracking-[0.2em] mb-1">Recién llegado</p>
-                <h2 className="text-xl sm:text-2xl font-light tracking-[0.1em] uppercase">Nueva Colección</h2>
-              </div>
-              <Link to="/products?isNew=true" className="flex items-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors uppercase tracking-wider">
-                Ver todo <FiArrowRight size={13} />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {newProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         </section>
