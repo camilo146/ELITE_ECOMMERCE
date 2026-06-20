@@ -47,7 +47,7 @@ const Home = () => {
       const all = Array.isArray(data) ? data : (data.products || []);
       setFeaturedProducts(all.filter(p => p.featured).slice(0, 4));
       setNewProducts(all.filter(p => p.isNew).slice(0, 4));
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   return (
@@ -113,7 +113,7 @@ const Home = () => {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-neutral-600 group-hover:bg-white transition-colors duration-300"></span>
                     </span>
                   </div>
-                  
+
                   {/* Middle / Bottom: Coming soon and marketing slogan */}
                   <div className="space-y-3">
                     <span className="inline-block bg-white/5 border border-white/10 px-2 py-0.5 text-[8px] font-semibold tracking-[0.2em] text-neutral-300 uppercase rounded-none">
