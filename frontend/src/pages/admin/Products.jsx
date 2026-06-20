@@ -50,7 +50,8 @@ const AdminProducts = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
-  const [imageUrls, setImageUrls] = useState(['']);
+  const [uploadedImages, setUploadedImages] = useState([]); // from file upload (/uploads/...)
+  const [imageUrls, setImageUrls] = useState(['']);          // manually typed external URLs
   const [uploadingImages, setUploadingImages] = useState(false);
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [originalPriceBeforeDiscount, setOriginalPriceBeforeDiscount] = useState('');
@@ -91,7 +92,12 @@ const AdminProducts = () => {
         isNew: product.isNew || false,
         onSale: product.onSale || false,
       });
-      setImageUrls(product.images?.length > 0 ? product.images : ['']);
+      // Separate uploaded (/uploads/...) from external URLs so the URL
+      // inputs stay clean and don't show internal storage paths.
+      const uploads = (product.images || []).filter(u => u.startsWith('/uploads/'));
+      const externalUrls = (product.images || []).filter(u => !u.startsWith('/uploads/'));
+      setUploadedImages(uploads);
+      setImageUrls(externalUrls.length > 0 ? externalUrls : ['']);
 
       if (product.onSale && product.salePrice) {
         const discount = Math.round(((product.salePrice - product.price) / product.salePrice) * 100);
@@ -104,6 +110,7 @@ const AdminProducts = () => {
     } else {
       setEditingProduct(null);
       setFormData(EMPTY_FORM);
+      setUploadedImages([]);
       setImageUrls(['']);
       setDiscountPercentage(0);
       setOriginalPriceBeforeDiscount('');
@@ -177,11 +184,14 @@ const AdminProducts = () => {
     }));
   };
 
+  const syncImages = (uploaded, urls) =>
+    [...uploaded, ...urls.filter(u => u.trim())];
+
   const handleImageUrlChange = (index, value) => {
     const newUrls = [...imageUrls];
     newUrls[index] = value;
     setImageUrls(newUrls);
-    setFormData(prev => ({ ...prev, images: newUrls.filter(u => u.trim()) }));
+    setFormData(prev => ({ ...prev, images: syncImages(uploadedImages, newUrls) }));
   };
 
   const addImageUrl = () => setImageUrls([...imageUrls, '']);
@@ -189,7 +199,7 @@ const AdminProducts = () => {
   const removeImageUrl = (index) => {
     const newUrls = imageUrls.filter((_, i) => i !== index);
     setImageUrls(newUrls.length > 0 ? newUrls : ['']);
-    setFormData(prev => ({ ...prev, images: newUrls.filter(u => u.trim()) }));
+    setFormData(prev => ({ ...prev, images: syncImages(uploadedImages, newUrls) }));
   };
 
   const handleFileUpload = async (e) => {
@@ -198,10 +208,9 @@ const AdminProducts = () => {
     setUploadingImages(true);
     try {
       const results = await Promise.all(files.map(f => uploadService.uploadImage(f)));
-      const uploadedUrls = results.map(r => r.imageUrl);
-      const newUrls = [...imageUrls.filter(u => u.trim()), ...uploadedUrls];
-      setImageUrls(newUrls);
-      setFormData(prev => ({ ...prev, images: newUrls }));
+      const newUploaded = [...uploadedImages, ...results.map(r => r.imageUrl)];
+      setUploadedImages(newUploaded);
+      setFormData(prev => ({ ...prev, images: syncImages(newUploaded, imageUrls) }));
       toast.success(`${files.length} imagen(es) subida(s)`);
     } catch {
       toast.error('Error al subir imágenes');
@@ -443,9 +452,17 @@ const AdminProducts = () => {
                           <button
                             type="button"
                             onClick={() => {
-                              const newImages = formData.images.filter((_, i) => i !== index);
-                              setFormData(prev => ({ ...prev, images: newImages }));
-                              setImageUrls(newImages.length > 0 ? newImages : ['']);
+                              const url = formData.images[index];
+                              if (url.startsWith('/uploads/')) {
+                                const newUploaded = uploadedImages.filter(u => u !== url);
+                                setUploadedImages(newUploaded);
+                                setFormData(prev => ({ ...prev, images: syncImages(newUploaded, imageUrls) }));
+                              } else {
+                                const newUrls = imageUrls.filter(u => u !== url);
+                                const safe = newUrls.length > 0 ? newUrls : [''];
+                                setImageUrls(safe);
+                                setFormData(prev => ({ ...prev, images: syncImages(uploadedImages, newUrls) }));
+                              }
                             }}
                             className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition"
                           >
