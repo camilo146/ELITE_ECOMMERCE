@@ -4,7 +4,7 @@ import { FiEdit, FiTrash2, FiPlus, FiX, FiImage, FiPackage } from 'react-icons/f
 import { toast } from 'react-toastify';
 import { formatPrice } from '../../utils/formatPrice';
 
-const CATEGORIES = ['JEANS', 'CARGOS', 'BERMUDAS', 'JOGGERS', 'CAMISETAS', 'CAMISAS', 'CHAQUETAS', 'HOODIES'];
+const CATEGORIES = ['JEANS', 'CARGOS', 'BERMUDAS', 'JOGGERS', 'CAMISETAS', 'CAMISAS', 'HOODIES'];
 const GENDERS = ['HOMBRE', 'MUJER', 'UNISEX'];
 const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36'];
 

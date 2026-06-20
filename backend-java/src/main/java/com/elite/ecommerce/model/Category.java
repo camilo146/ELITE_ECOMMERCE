@@ -7,6 +7,5 @@ public enum Category {
     JOGGERS,
     CAMISETAS,
     CAMISAS,
-    CHAQUETAS,
     HOODIES
 }

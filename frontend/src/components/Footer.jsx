@@ -21,7 +21,7 @@ const Footer = () => {
             <ul className="space-y-3">
               {[
                 ['Jeans', '/products?category=jeans'],
-                ['Chaquetas', '/products?category=chaquetas'],
+                ['Bermudas', '/products?category=bermudas'],
                 ['Hoodies', '/products?category=hoodies'],
                 ['Camisetas', '/products?category=camisetas'],
                 ['Joggers', '/products?category=joggers'],

@@ -14,19 +14,25 @@ const BENEFITS = [
 const CATEGORY_TILES = [
   {
     label: 'Jeans', href: '/products?category=jeans',
-    img: 'https://images.unsplash.com/photo-1604172387802-aadb70549020?w=700&h=900&fit=crop&auto=format&q=80',
+    comingSoon: true,
+    slogan: 'El fit perfecto para tu estilo diario.',
+    marketing: 'Nueva Colección'
   },
   {
-    label: 'Chaquetas', href: '/products?category=chaquetas',
-    img: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=700&h=900&fit=crop&auto=format&q=80',
+    label: 'Bermudas', href: '/products?category=bermudas',
+    img: '/portada_categoria_bermuda.png',
   },
   {
     label: 'Hoodies', href: '/products?category=hoodies',
-    img: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=700&h=900&fit=crop&auto=format&q=80',
+    comingSoon: true,
+    slogan: 'Comodidad superior sin perder la esencia urbana.',
+    marketing: 'Nuevos Estilos'
   },
   {
     label: 'Camisetas', href: '/products?category=camisetas',
-    img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700&h=900&fit=crop&auto=format&q=80',
+    comingSoon: true,
+    slogan: 'Básicos premium con texturas únicas.',
+    marketing: 'Diseños Exclusivos'
   },
 ];
 
@@ -92,24 +98,60 @@ const Home = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {CATEGORY_TILES.map(cat => (
-              <Link
-                key={cat.label}
-                to={cat.href}
-                className="group relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-none"
-              >
-                <img
-                  src={cat.img}
-                  alt={cat.label}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
-                  loading="lazy"
-                />
-                {/* Elegant central typography overlay on hover */}
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-500 flex items-center justify-center p-4">
-                  <h3 className="font-heading text-xs font-medium uppercase tracking-[0.25em] text-white border-b border-transparent group-hover:border-white transition-all duration-300 pb-1">
-                    {cat.label}
-                  </h3>
+              cat.comingSoon ? (
+                <div
+                  key={cat.label}
+                  className="group relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-neutral-900/50 to-neutral-950 border border-border/40 p-6 flex flex-col justify-between hover:border-neutral-800 transition-all duration-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.02)]"
+                >
+                  {/* Top row: Category name and a subtle glowing indicator */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold tracking-[0.25em] text-neutral-400 uppercase">
+                      {cat.label}
+                    </span>
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white/30 opacity-40"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-neutral-600 group-hover:bg-white transition-colors duration-300"></span>
+                    </span>
+                  </div>
+                  
+                  {/* Middle / Bottom: Coming soon and marketing slogan */}
+                  <div className="space-y-3">
+                    <span className="inline-block bg-white/5 border border-white/10 px-2 py-0.5 text-[8px] font-semibold tracking-[0.2em] text-neutral-300 uppercase rounded-none">
+                      {cat.marketing}
+                    </span>
+                    <p className="text-[11px] text-neutral-500 leading-relaxed font-light group-hover:text-neutral-300 transition-colors duration-500">
+                      {cat.slogan}
+                    </p>
+                  </div>
+
+                  {/* Bottom row: decorative/clean visual element */}
+                  <div className="pt-2 border-t border-border/20 flex items-center justify-between">
+                    <span className="text-[8px] text-dim uppercase tracking-wider group-hover:text-neutral-500 transition-colors duration-500">
+                      PRÓXIMAMENTE
+                    </span>
+                    <FiArrowRight size={12} className="text-neutral-700 group-hover:text-white transition-all transform translate-x-[-4px] group-hover:translate-x-0 duration-300" />
+                  </div>
                 </div>
-              </Link>
+              ) : (
+                <Link
+                  key={cat.label}
+                  to={cat.href}
+                  className="group relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-none"
+                >
+                  <img
+                    src={cat.img}
+                    alt={cat.label}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                    loading="lazy"
+                  />
+                  {/* Elegant central typography overlay on hover */}
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-500 flex items-center justify-center p-4">
+                    <h3 className="font-heading text-xs font-medium uppercase tracking-[0.25em] text-white border-b border-transparent group-hover:border-white transition-all duration-300 pb-1">
+                      {cat.label}
+                    </h3>
+                  </div>
+                </Link>
+              )
             ))}
           </div>
         </div>

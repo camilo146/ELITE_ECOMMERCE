@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { label: 'Hombre', href: '/products?gender=HOMBRE' },
   { label: 'Mujer', href: '/products?gender=MUJER' },
   { label: 'Jeans', href: '/products?category=jeans' },
-  { label: 'Chaquetas', href: '/products?category=chaquetas' },
+  { label: 'Bermudas', href: '/products?category=bermudas' },
   { label: 'Hoodies', href: '/products?category=hoodies' },
   { label: 'Ofertas', href: '/products?sale=true', accent: true },
 ];
@@ -21,7 +21,6 @@ const ALL_CATEGORIES = [
   { label: 'Joggers', href: '/products?category=joggers' },
   { label: 'Camisetas', href: '/products?category=camisetas' },
   { label: 'Camisas', href: '/products?category=camisas' },
-  { label: 'Chaquetas', href: '/products?category=chaquetas' },
   { label: 'Hoodies', href: '/products?category=hoodies' },
 ];
 
@@ -97,7 +96,7 @@ const Header = () => {
                     key={link.href}
                     to={link.href}
                     className={`text-[10px] font-medium uppercase tracking-[0.18em] whitespace-nowrap transition-colors duration-300 ${
-                      ['Jeans', 'Chaquetas', 'Hoodies'].includes(link.label) ? 'hidden xl:inline' : ''
+                      ['Jeans', 'Bermudas', 'Hoodies'].includes(link.label) ? 'hidden xl:inline' : ''
                     } ${link.accent ? 'text-sale hover:text-red-400' : 'text-muted hover:text-white'}`}
                   >
                     {link.label}
@@ -203,7 +202,7 @@ const Header = () => {
                   <FiSearch size={14} />
                 </button>
               </form>
-              {NAV_LINKS.filter(l => !['Jeans', 'Chaquetas', 'Hoodies'].includes(l.label)).map(link => (
+              {NAV_LINKS.filter(l => !['Jeans', 'Bermudas', 'Hoodies'].includes(l.label)).map(link => (
                 <Link
                   key={link.href}
                   to={link.href}
@@ -247,7 +246,7 @@ const Header = () => {
                 type="search"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Jeans, hoodies, chaquetas..."
+                placeholder="Jeans, hoodies, bermudas..."
                 className="w-full bg-transparent text-lg md:text-xl text-center text-text placeholder-dim focus:outline-none"
                 autoFocus={isSearchOpen}
                 aria-label="Buscar productos"
@@ -267,7 +266,7 @@ const Header = () => {
                 ['Hombre', '/products?gender=HOMBRE'],
                 ['Mujer', '/products?gender=MUJER'],
                 ['Jeans', '/products?category=jeans'],
-                ['Chaquetas', '/products?category=chaquetas'],
+                ['Bermudas', '/products?category=bermudas'],
                 ['Hoodies', '/products?category=hoodies'],
               ].map(([label, href]) => (
                 <Link

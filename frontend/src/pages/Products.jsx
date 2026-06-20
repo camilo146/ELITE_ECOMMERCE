@@ -8,7 +8,7 @@ const CATEGORIES = [
   { label: 'Jeans', value: 'JEANS' }, { label: 'Cargos', value: 'CARGOS' },
   { label: 'Bermudas', value: 'BERMUDAS' }, { label: 'Joggers', value: 'JOGGERS' },
   { label: 'Camisetas', value: 'CAMISETAS' }, { label: 'Camisas', value: 'CAMISAS' },
-  { label: 'Chaquetas', value: 'CHAQUETAS' }, { label: 'Hoodies', value: 'HOODIES' },
+  { label: 'Hoodies', value: 'HOODIES' },
 ];
 
 const GENDERS = [
