@@ -36,6 +36,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final TransactionRepository transactionRepository;
     private final EmailService emailService;
+    private final PromotionService promotionService;
 
     // ── Admin: cambio de estado ───────────────────────────────────────────────
 
@@ -94,9 +95,19 @@ public class OrderService {
 
         boolean isMercadoPago = "mercadopago".equalsIgnoreCase(dto.getPaymentMethod());
 
+        double discountAmount = 0;
+        if (dto.getPromotionId() != null) {
+            discountAmount = promotionService.validateAndCalculateDiscount(dto.getPromotionId(), dto.getItems());
+            serverComputedTotal = Math.max(0, serverComputedTotal - discountAmount);
+        }
+
         Order order = new Order();
         order.setUser(user);
         order.setTotalAmount(serverComputedTotal);
+        if (dto.getPromotionId() != null) {
+            order.setPromotionId(dto.getPromotionId());
+            order.setDiscountAmount(discountAmount);
+        }
         order.setPaymentMethod(dto.getPaymentMethod());
         order.setShippingAddress(mapAddress(dto.getShippingAddress()));
 

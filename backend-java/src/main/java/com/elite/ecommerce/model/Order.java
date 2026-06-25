@@ -37,6 +37,9 @@ public class Order {
 
     private String paymentMethod;
 
+    private Long promotionId;
+    private Double discountAmount;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;

@@ -21,4 +21,6 @@ public class OrderRequestDTO {
     @NotBlank(message = "Payment method is required")
     @Pattern(regexp = "^(mercadopago|cash_on_delivery)$", message = "Invalid payment method")
     private String paymentMethod;
+
+    private Long promotionId;
 }

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services';
 import { formatPrice } from '../utils/formatPrice';
 import { toast } from 'react-toastify';
-import { FiTruck, FiCreditCard, FiCheck, FiShield, FiPackage } from 'react-icons/fi';
+import { FiTruck, FiCreditCard, FiCheck, FiShield, FiPackage, FiTag } from 'react-icons/fi';
 
 const STEPS = [
   { id: 1, label: 'Envío', icon: FiTruck },
@@ -15,7 +15,7 @@ const STEPS = [
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, clearCart, getCartTotal } = useCart();
+  const { cart, clearCart, getCartSubtotal, getCartTotal, appliedPromotion } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -76,6 +76,7 @@ const Checkout = () => {
         items: orderItems,
         shippingAddress: shippingData,
         paymentMethod: paymentData.paymentMethod,
+        ...(appliedPromotion?.id ? { promotionId: appliedPromotion.id } : {}),
       };
 
       const response = await orderService.createOrder(orderData);
@@ -100,7 +101,8 @@ const Checkout = () => {
     }
   };
 
-  const subtotal = getCartTotal();
+  const subtotal = getCartSubtotal();
+  const total = getCartTotal();
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   if (cart.length === 0) return null;
@@ -342,8 +344,14 @@ const Checkout = () => {
               <div className="space-y-2.5 text-xs font-light text-neutral-400 mb-4">
                 <div className="flex justify-between">
                   <span>Subtotal ({itemCount} prendas)</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span className={appliedPromotion ? 'line-through text-neutral-500' : ''}>{formatPrice(subtotal)}</span>
                 </div>
+                {appliedPromotion && (
+                  <div className="flex justify-between text-green-400">
+                    <span className="flex items-center gap-1"><FiTag size={10} /> {appliedPromotion.title}</span>
+                    <span>-{formatPrice(appliedPromotion.discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Envío</span>
                   <span className="text-green-500 font-normal">Gratis</span>
@@ -354,7 +362,7 @@ const Checkout = () => {
 
               <div className="flex justify-between text-sm font-medium text-white">
                 <span>Total</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(total)}</span>
               </div>
 
               <div className="mt-6 pt-4 border-t border-border/50 text-[10px] text-neutral-500 flex items-center gap-2.5 font-light">

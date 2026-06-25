@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FiTrash2, FiMinus, FiPlus, FiArrowRight, FiArrowLeft, FiShoppingBag, FiPackage, FiShield, FiRefreshCw } from 'react-icons/fi';
+import { FiTrash2, FiMinus, FiPlus, FiArrowRight, FiArrowLeft, FiShoppingBag, FiPackage, FiShield, FiRefreshCw, FiTag, FiX } from 'react-icons/fi';
 import { formatPrice } from '../utils/formatPrice';
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, getCartTotal, getCartCount } = useCart();
+  const { cart, appliedPromotion, removeFromCart, updateQuantity, getCartSubtotal, getCartTotal, getCartCount, removeAppliedPromotion } = useCart();
   const count = getCartCount();
+  const subtotal = getCartSubtotal();
+  const total = getCartTotal();
 
   if (cart.length === 0) {
     return (
@@ -106,19 +108,39 @@ const Cart = () => {
             <div className="bg-surface/30 border border-border rounded-none p-6 sticky top-24">
               <h2 className="font-heading font-light text-sm uppercase tracking-[0.15em] text-white mb-6 pb-3 border-b border-border/40">Resumen</h2>
 
-              <div className="space-y-4.5 mb-6 text-xs font-light text-neutral-400">
+              <div className="space-y-3 mb-6 text-xs font-light text-neutral-400">
                 <div className="flex justify-between">
                   <span>Subtotal ({count} prendas)</span>
-                  <span className="font-normal text-white">{formatPrice(getCartTotal())}</span>
+                  <span className={`font-normal ${appliedPromotion ? 'line-through text-neutral-500' : 'text-white'}`}>
+                    {formatPrice(subtotal)}
+                  </span>
                 </div>
+
+                {/* Applied promotion */}
+                {appliedPromotion && (
+                  <div className="bg-green-400/5 border border-green-400/20 rounded-[var(--radius-md)] px-3 py-2.5">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="flex items-center gap-1.5 text-green-400 font-medium">
+                        <FiTag size={11} />
+                        Promoción aplicada
+                      </span>
+                      <button onClick={removeAppliedPromotion} className="text-dim hover:text-white transition-colors flex-shrink-0" title="Quitar promoción">
+                        <FiX size={12} />
+                      </button>
+                    </div>
+                    <p className="text-green-300 text-[11px] mb-1 leading-snug">{appliedPromotion.title}</p>
+                    <p className="text-green-400 font-medium">Ahorro: -{formatPrice(appliedPromotion.discount)}</p>
+                  </div>
+                )}
+
                 <div className="flex justify-between">
                   <span>Envío</span>
                   <span className="text-green-500 font-normal">Gratis</span>
                 </div>
-                <div className="border-t border-border pt-4 mt-4" />
+                <div className="border-t border-border pt-3 mt-1" />
                 <div className="flex justify-between text-sm font-medium text-white pt-1">
                   <span>Total</span>
-                  <span>{formatPrice(getCartTotal())}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
 

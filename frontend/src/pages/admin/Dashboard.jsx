@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { productService, orderService, userService } from '../../services';
-import { FiPackage, FiShoppingBag, FiUsers, FiDollarSign } from 'react-icons/fi';
+import { FiPackage, FiShoppingBag, FiUsers, FiDollarSign, FiTag } from 'react-icons/fi';
 import { formatPrice } from '../../utils/formatPrice';
 
 const Dashboard = () => {
@@ -94,11 +94,12 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
             { to: '/admin/products', icon: FiPackage, title: 'Productos', desc: 'Crear, editar y eliminar' },
             { to: '/admin/orders', icon: FiShoppingBag, title: 'Pedidos', desc: 'Estados y seguimiento' },
             { to: '/admin/users', icon: FiUsers, title: 'Usuarios', desc: 'Cuentas y permisos' },
+            { to: '/admin/promotions', icon: FiTag, title: 'Promociones', desc: 'Bundles y descuentos' },
           ].map(({ to, icon: Icon, title, desc }) => (
             <Link key={to} to={to} className="card text-center p-8 hover:border-border-light transition-colors duration-200 group">
               <Icon size={32} strokeWidth={1.5} className="mx-auto mb-4 text-muted group-hover:text-white transition-colors duration-200" />

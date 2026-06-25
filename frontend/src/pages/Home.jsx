@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { productService } from '../services';
+import { productService, promotionService } from '../services';
 import ProductCard from '../components/ProductCard';
+import PromoModal from '../components/PromoModal';
+import PromoBanner from '../components/PromoBanner';
 import { FiArrowRight, FiTruck, FiRefreshCw, FiShield, FiHeadphones, FiCheck } from 'react-icons/fi';
 
 const BENEFITS = [
@@ -36,11 +38,16 @@ const CATEGORY_TILES = [
   },
 ];
 
+const PROMO_DISMISS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newProducts, setNewProducts] = useState([]);
   const [email, setEmail] = useState('');
   const [newsletterSent, setNewsletterSent] = useState(false);
+  const [popupPromo, setPopupPromo] = useState(null);
+  const [bannerPromos, setBannerPromos] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     productService.getProducts({}).then(data => {
@@ -48,10 +55,36 @@ const Home = () => {
       setFeaturedProducts(all.filter(p => p.featured).slice(0, 4));
       setNewProducts(all.filter(p => p.isNew).slice(0, 4));
     }).catch(() => { });
+
+    promotionService.getPopupPromos().then(promos => {
+      if (!promos || promos.length === 0) return;
+      const promo = promos[0];
+      const dismissKey = `promo_dismissed_${promo.id}`;
+      const dismissed = localStorage.getItem(dismissKey);
+      if (dismissed && Date.now() - Number(dismissed) < PROMO_DISMISS_TTL_MS) return;
+      setPopupPromo(promo);
+      setShowPopup(true);
+    }).catch(() => { });
+
+    promotionService.getBannerPromos().then(promos => {
+      setBannerPromos(promos || []);
+    }).catch(() => { });
   }, []);
+
+  const handleClosePopup = () => {
+    if (popupPromo) {
+      localStorage.setItem(`promo_dismissed_${popupPromo.id}`, String(Date.now()));
+    }
+    setShowPopup(false);
+  };
 
   return (
     <div className="min-h-screen">
+
+      {/* Popup promocional */}
+      {showPopup && popupPromo && (
+        <PromoModal promo={popupPromo} onClose={handleClosePopup} />
+      )}
 
       {/* ── HERO ───────────────────────────────────────────── */}
       <section className="relative h-[85vh] md:h-[90vh] flex items-end pb-20 md:pb-28 overflow-hidden bg-black">
@@ -82,6 +115,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* ── PROMO BANNERS ──────────────────────────────────── */}
+      <PromoBanner promos={bannerPromos} />
 
       {/* ── NEW ARRIVALS ───────────────────────────────────── */}
       {newProducts.length > 0 && (

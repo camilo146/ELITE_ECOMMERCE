@@ -108,6 +108,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/products/**").permitAll()
                 // MP webhook — public (signature verified in controller)
                 .requestMatchers("/api/payments/notifications").permitAll()
+                // Public promotion endpoints
+                .requestMatchers("/api/promotions/public/**").permitAll()
                 // Static file serving
                 .requestMatchers("/uploads/**").permitAll()
                 // Spring error handler

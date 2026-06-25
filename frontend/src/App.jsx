@@ -20,6 +20,8 @@ import AdminProducts from './pages/admin/Products';
 import AdminOrders from './pages/admin/Orders';
 import AdminUsers from './pages/admin/Users';
 import AdminFinance from './pages/admin/Finance';
+import AdminPromotions from './pages/admin/Promotions';
+import PromoDetail from './pages/PromoDetail';
 import ProtectedRoute from './components/ProtectedRoute';
 import EmailVerified from './pages/EmailVerified';
 import ForgotPassword from './pages/ForgotPassword';
@@ -43,6 +45,7 @@ function App() {
                 <Route path="/products" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/promo/:id" element={<PromoDetail />} />
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
 
                 {/* Rutas protegidas */}
@@ -86,6 +89,11 @@ function App() {
                 <Route path="/admin/finance" element={
                   <ProtectedRoute adminOnly>
                     <AdminFinance />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/promotions" element={
+                  <ProtectedRoute adminOnly>
+                    <AdminPromotions />
                   </ProtectedRoute>
                 } />
               </Routes>
