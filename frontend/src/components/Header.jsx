@@ -251,7 +251,7 @@ const Header = () => {
                 autoFocus={isSearchOpen}
                 aria-label="Buscar productos"
               />
-              <button type="submit" className="absolute right-0 top-1/2 -translate-y-1/2 text-muted hover:text-white transition-colors">
+              <button type="submit" aria-label="Buscar" className="absolute right-0 top-1/2 -translate-y-1/2 text-muted hover:text-white transition-colors">
                 <FiSearch size={18} />
               </button>
             </div>
